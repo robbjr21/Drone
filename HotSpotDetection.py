@@ -9,6 +9,8 @@ def viewImage(image):
 # Method 1
 #***********************************************
 img = cv2.imread('Thermal.jpg')
+height, width = img.shape[:2]
+print(height, width)
 viewImage(img)
 img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 viewImage(img_hsv)
@@ -58,13 +60,27 @@ def findGreatesContour(contours):
             largest_area = AREA
             largest_contour_index = i
         i+=1
-    for i in area:
-        if i < 13500:
-            area.remove(i)
-    return largest_area, largest_contour_index, area
+    HotSpots = []
+    for k in area:
+        if k > 2000.0:
+            HotSpots.append(k)
+    return largest_area, largest_contour_index, HotSpots
 
-largest_area, largest_contour_index, area = findGreatesContour(contours)
+def pixels_2_miles(area_array):
+    # Assuming dimensions are 1 mile by 1 mile
+    # 640 acres in a square mile
+    Dimensions = height*width
+    HotSpots_Areas = []
+    for i in area_array:
+        x = (i / Dimensions) * 640
+        HotSpots_Areas.append(x)
+    return HotSpots_Areas
+
+
+largest_area, largest_contour_index, HotSpots = findGreatesContour(contours)
+HotSpots_Conversions = pixels_2_miles(HotSpots)
 print("Largest area is {}".format(largest_area))
 print("Largest contour index is {}".format(largest_contour_index))
 print("Number of contours is {}".format(len(contours)))
-print("Size of area array is {}".format(len(area)))
+print("Size of area array is {}".format(len(HotSpots)))
+print(HotSpots_Conversions)
